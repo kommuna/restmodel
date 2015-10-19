@@ -1,0 +1,31 @@
+{
+  "name": "kommuna/restmodel",
+  "description": "REST MVC toolkit",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "l80"
+    }
+  ],
+
+  "require": {
+    "slim/slim": "2.6.2",
+    "j4mie/idiorm": "v1.5.1",
+    "respect/validation": "0.9.3",
+    "league/fractal": "0.13.0",
+    "monolog/monolog": "1.17.2"
+  },
+
+  "autoload": {
+    "psr-4": {
+      "RestModel\\": "./"
+    }
+  },
+
+  "extra": {
+    "branch-alias": {
+      "master": "1.0-dev"
+    }
+  }
+}
