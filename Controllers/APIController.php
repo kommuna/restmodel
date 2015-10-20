@@ -2,10 +2,14 @@
 
 namespace RestModel\Controllers;
 
-use \RestModel\Core\apiParams;
+
+use RestModel\Core\apiParams;
+use RestModel\Exceptions\BadRequest400;
+use RestModel\Exceptions\NotFound404;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Item;
 use League\Fractal\Resource\Collection;
+use RestModel\Exceptions\InternalServerError500;
 
 
 class APIController extends Controller {
@@ -19,12 +23,7 @@ class APIController extends Controller {
         return "API{$controllerName}Controller";
     }
 
-    public function response($data, $totalCount = false, $statusCode = 200) {
-/*
-        if(!$data) {
-            $this->app->halt(204);
-        }
-*/
+    public function response($data, $totalCount = false, $query = false, $statusCode = 200) {
 
         if($this->transformer) {
             $fractal = new Manager();
@@ -46,15 +45,18 @@ class APIController extends Controller {
             $response['totalCount'] = (int) $totalCount;
         }
 
+        if($query !== false) {
+            $response['search'] = $query;
+        }
+
         $response = json_encode($response, JSON_UNESCAPED_UNICODE);
 
         if($response === false) {
-            \RestModel\Exceptions\InternalServerError500::throwException("Response couldn't encoded as JSON");
+            InternalServerError500::throwException("Response couldn't encoded as JSON");
         }
 
-        ob_end_clean();
-        $this->app->halt($statusCode, $response);
-
+        $this->app->response->status($statusCode);
+        $this->app->response->body($response);
     }
 
     public function responseCollection($data, $count) {
@@ -81,7 +83,7 @@ class APIController extends Controller {
         $count = $this->model->getTotalCount($params);
 
         if($params->getOffset() < 0) {
-            \RestModel\Exceptions\BadRequest400::throwException("'offset' out of range");
+            BadRequest400::throwException("'offset' out of range");
         }
         $rows = $this->model->getMany($params);
 
@@ -92,13 +94,13 @@ class APIController extends Controller {
     protected function decodeJSON($jsonString) {
 
         if(!$jsonString) {
-            \RestModel\Exceptions\BadRequest400::throwException('Body request is empty!');
+            BadRequest400::throwException('Body request is empty!');
         }
 
         $json = json_decode($jsonString, true);
 
         if(json_last_error()) {
-            \RestModel\Exceptions\BadRequest400::throwException('Request JSON data is invalid!');
+            BadRequest400::throwException('Request JSON data is invalid!');
         }
 
         return $json;
@@ -112,22 +114,13 @@ class APIController extends Controller {
         $item = $this->model->getById($id);
 
         if(!$item) {
-            \RestModel\Exceptions\NotFound404::throwException("Item with id = $id doesn't exist!");
+            NotFound404::throwException("Item with id = $id doesn't exist!");
         }
-        $this->response($item, false, $statusCode);
-    }
-
-    public function getItemByCode($code, $statusCode = 200) {
-
-        $item = $this->model->getByCode($code);
-
-        if(!$item) {
-            \RestModel\Exceptions\NotFound404::throwException("Item with code = '$code' doesn't exist!");
-        }
-        $this->response($item, false, $statusCode);
+        $this->response($item, false, false, $statusCode);
     }
 
     public function addItem() {
+
 
         $body = $this->decodeJSON($this->app->request->getBody());
 
@@ -135,9 +128,7 @@ class APIController extends Controller {
             unset($body['id']);
         }
 
-        $id = $this->model->setValues($body)->validateValues()->save();
-
-        $this->getItem($id, 201);
+        return $this->model->setValues($body)->validateValues()->save();
 
     }
 
@@ -145,7 +136,7 @@ class APIController extends Controller {
 
         $item = $this->model->getById($id);
         if(!$item) {
-            \RestModel\Exceptions\NotFound404::throwException("Item with id = $id doesn't exist!");
+            NotFound404::throwException("Item with id = $id doesn't exist!");
         }
 
         return $item;
@@ -161,8 +152,6 @@ class APIController extends Controller {
         $this->isItemExist($id);
 
         $this->model->setValues($body, true)->validateValues()->save();
-        $this->getItem($id);
-
 
     }
 
@@ -181,7 +170,4 @@ class APIController extends Controller {
         $this->app->halt(204);
 
     }
-
-
-
 }
