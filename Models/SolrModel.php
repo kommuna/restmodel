@@ -16,13 +16,11 @@ class SolrModel {
     public function __construct($config, $logger) {
 
         $this->logger = $logger;
-
-        $this->setFieldsValidators((new ItemValidators())->get());
         $this->client = new SolrClient($config);
 
     }
 
-    protected function setFieldsValidators($validators) {
+    public function setFieldsValidators($validators) {
         $this->validators = $validators;
     }
 
