@@ -3,6 +3,7 @@
 namespace RestModel\Core;
 
 use Slim\Slim;
+use RestModel\Exceptions\BadRequest400;
 
 class apiParams {
 
@@ -12,6 +13,7 @@ class apiParams {
     protected $limit;
     protected $filter = [];
     protected $order = [];
+    protected $query;
 
     static protected function getApp() {
 
@@ -36,19 +38,24 @@ class apiParams {
 
         } elseif($limit > $maxLimit) {
 
-            \RestModel\Exceptions\BadRequest400::throwException("Value of parameter 'limit' > ".$app->appConfig['app']['maxLimitListing']);
+            BadRequest400::throwException("Value of parameter 'limit' > ".$app->appConfig['app']['maxLimitListing']);
         }
 
         $offset = (int)$app->request->get('offset');
 
         if($offset < 0) {
-            \RestModel\Exceptions\BadRequest400::throwException("'offset' should be positive or 0");
+            BadRequest400::throwException("'offset' should be positive or 0");
         }
 
         $self = new self();
         $self->setOffset($offset)->setLimit($limit)
             ->setFilter(self::parseJSONParams('filter'))
-            ->setOrder(self::parseJSONParams('order'));
+            ->setOrder(self::parseJSONParams('order'))
+            ->setQuery($app->request->get('q'));
+
+        if($app->request->get('r')) {
+            $self->setQuery($app->request->get('r'));
+        }
 
         return $self;
 
@@ -65,18 +72,16 @@ class apiParams {
         $params = json_decode($params, true);
 
         if(json_last_error()) {
-            \RestModel\Exceptions\BadRequest400::throwException("'$name' JSON data is invalid!");
+            BadRequest400::throwException("'$name' JSON data is invalid!");
         }
 
         if(!is_array($params)) {
-            \RestModel\Exceptions\BadRequest400::throwException("'$name' JSON should be object");
+            BadRequest400::throwException("'$name' JSON should be object");
         }
 
         return $params;
 
     }
-
-
 
     public function setOffset($value) {
         $this->offset = $value;
@@ -112,5 +117,28 @@ class apiParams {
     public function setOrder($value) {
         $this->order = $value;
         return $this;
+    }
+
+    public function getQuery() {
+        return $this->query;
+    }
+
+    public function setQuery($value) {
+        $this->query = $value;
+        return $this;
+    }
+
+    public function __invoke() {
+
+        $this->filter['q'] = $this->query;
+
+        return [
+
+            'offset' => $this->offset,
+            'limit' => $this->limit,
+            'filter' => $this->filter,
+            'sort' => $this->order
+
+        ];
     }
 }
