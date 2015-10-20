@@ -22,6 +22,7 @@ class SolrModel {
 
     public function setFieldsValidators($validators) {
         $this->validators = $validators;
+        return $this;
     }
 
     public function getFieldsValidators() {
