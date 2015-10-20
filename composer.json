@@ -14,7 +14,8 @@
     "j4mie/idiorm": "v1.5.1",
     "respect/validation": "0.9.3",
     "league/fractal": "0.13.0",
-    "monolog/monolog": "1.17.2"
+    "monolog/monolog": "1.17.2",
+    "filp/whoops": "1.1.7"
   },
 
   "autoload": {

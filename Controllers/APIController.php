@@ -107,8 +107,6 @@ class APIController extends Controller {
 
     }
 
-
-
     public function getItem($id, $statusCode = 200) {
 
         $item = $this->model->getById($id);
