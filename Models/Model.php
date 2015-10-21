@@ -48,7 +48,7 @@ abstract class Model {
         static::$dbSettings = $dbSettings;
 
         if($logger && isset($dbSettings['debug']) && $dbSettings['debug']) {
-            $logger->addDebug('test log');
+            $logger->addDebug("Connection name: ".$dbSettings['connectionName']);
             static::setLogger($logger);
 
         }
