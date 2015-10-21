@@ -7,10 +7,10 @@ use ORM;
 
 abstract class Model {
 
-    protected static $connectionName;
+    protected $connectionName;
 
-    protected static $logger;
-    protected static $dbSettings;
+    protected $logger;
+    protected $dbSettings;
 
     protected $validators = [];
     protected $fields = [];
@@ -22,44 +22,44 @@ abstract class Model {
         return $this->validators;
     }
 
-    public static function setLogger($logger) {
+    public function setLogger($logger) {
 
-        self::$logger = $logger;
+        $this->logger = $logger;
 
-        ORM::configure('logging', true, self::$connectionName);
+        ORM::configure('logging', true, $this->connectionName);
         ORM::configure('logger', function($log_string, $query_time) use ($logger) {
             $logger->addDebug($log_string . ' in ' . $query_time);
-        }, self::$connectionName);
+        }, $this->connectionName);
 
     }
 
-    public static function init($dbSettings, $logger = null) {
+    public function init($dbSettings, $logger = null) {
 
-        self::$connectionName = !empty($dbSettings['connectionName']) ? $dbSettings['connectionName'] : $dbSettings['dbname'];
+        $this->connectionName = !empty($dbSettings['connectionName']) ? $dbSettings['connectionName'] : $dbSettings['dbname'];
 
-        ORM::configure("pgsql:host={$dbSettings['host']};dbname={$dbSettings['dbname']}", null, self::$connectionName);
-        ORM::configure('username', $dbSettings['username'], self::$connectionName);
-        ORM::configure('password', $dbSettings['password'], self::$connectionName);
+        ORM::configure("pgsql:host={$dbSettings['host']};dbname={$dbSettings['dbname']}", null, $this->connectionName);
+        ORM::configure('username', $dbSettings['username'], $this->connectionName);
+        ORM::configure('password', $dbSettings['password'], $this->connectionName);
         ORM::configure('driver_options', [
             \PDO::ATTR_EMULATE_PREPARES => $dbSettings['emulatePrepares'],
             \PDO::ATTR_PERSISTENT => $dbSettings['persistent'],
-        ],self::$connectionName);
+        ],$this->connectionName);
 
-        static::$dbSettings = $dbSettings;
+        $this->dbSettings = $dbSettings;
 
         if($logger && isset($dbSettings['debug']) && $dbSettings['debug']) {
             $logger->addDebug("Connection name: ".$dbSettings['connectionName']);
-            static::setLogger($logger);
+            $this->setLogger($logger);
 
         }
-
+        
     }
 
 
     public function __construct($dbSettings = null, $logger = null) {
 
         if(!is_null($dbSettings)) {
-            self::init($dbSettings, $logger);
+            $this->init($dbSettings, $logger);
         }
 
         $this->fields = $this->getFieldsValidators();
@@ -170,9 +170,9 @@ abstract class Model {
     public function save() {
 
         if(isset($this->values['id']) && $this->values['id']) {
-            $row = ORM::for_table($this->tableName, self::$connectionName)->find_one($this->values['id']);
+            $row = ORM::for_table($this->tableName, $this->connectionName)->find_one($this->values['id']);
         } else {
-            $row = ORM::for_table($this->tableName, self::$connectionName)->create();
+            $row = ORM::for_table($this->tableName, $this->connectionName)->create();
         }
 
         foreach($this->values as $field => $value) {
@@ -199,18 +199,18 @@ abstract class Model {
 
 
     public function getByCode($code) {
-        $row = ORM::for_table($this->tableName, self::$connectionName)->where('code', $code)->find_one();
+        $row = ORM::for_table($this->tableName, $this->connectionName)->where('code', $code)->find_one();
         return $row ? $row->as_array() : [];
     }
 
     public function getById($id) {
-        $row = ORM::for_table($this->tableName, self::$connectionName)->find_one($id);
+        $row = ORM::for_table($this->tableName, $this->connectionName)->find_one($id);
         return $row ? $row->as_array() : [];
     }
 
     public function getTotalCount($params = null) {
 
-        $orm = ORM::for_table($this->tableName, self::$connectionName);
+        $orm = ORM::for_table($this->tableName, $this->connectionName);
 
         $orm = $this->applyFilterToORM($orm, $params);
 
@@ -383,7 +383,7 @@ abstract class Model {
 
     public function getMany($params = null) {
 
-        $orm = ORM::for_table($this->tableName, self::$connectionName);
+        $orm = ORM::for_table($this->tableName, $this->connectionName);
 
         if(isset($this->fields[$this->postponeDeleteOnFieldName])) {
             $orm->where_null($this->postponeDeleteOnFieldName);
@@ -405,7 +405,7 @@ abstract class Model {
 
     public function delete($id) {
 
-        $row = ORM::for_table($this->tableName, self::$connectionName)->find_one($id);
+        $row = ORM::for_table($this->tableName, $this->connectionName)->find_one($id);
 
         if($row) {
             try {
@@ -419,7 +419,7 @@ abstract class Model {
 
     public function markAsDeleted($id) {
 
-        $row = ORM::for_table($this->tableName, self::$connectionName)->find_one($id);
+        $row = ORM::for_table($this->tableName, $this->connectionName)->find_one($id);
 
         if($row) {
             $row->set_expr($this->postponeDeleteOnFieldName, 'NOW()');
