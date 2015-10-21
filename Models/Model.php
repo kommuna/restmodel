@@ -202,12 +202,12 @@ abstract class Model {
     }
 
     public function getByField($field, $value) {
-        $row = ORM::for_table($this->tableName, self::$connectionName)->where_equal($field, $value)->find_array();
+        $row = ORM::for_table($this->tableName, $this->connectionName)->where_equal($field, $value)->find_array();
         return $row ? $row : [];
     }
 
     public function getById($id) {
-        $row = ORM::for_table($this->tableName, self::$connectionName)->find_one($id);
+        $row = ORM::for_table($this->tableName, $this->connectionName)->find_one($id);
         return $row ? $row->as_array() : [];
     }
 
