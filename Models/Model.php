@@ -57,7 +57,7 @@ abstract class Model {
     }
 
 
-    public function __construct($dbSettings = null, $logger = null) {
+    public function __construct($dbSettings, $logger = null) {
 
         if(!is_null($dbSettings)) {
             $this->init($dbSettings, $logger);
