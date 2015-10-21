@@ -47,7 +47,7 @@ abstract class Model {
 
         $this->dbSettings = $dbSettings;
 
-        error_log("Connection name: ".$dbSettings['connectionName']);
+        error_log("Connection name: ".$this->connectionName);
 
         if($logger && isset($dbSettings['debug']) && $dbSettings['debug']) {
             $this->setLogger($logger);
