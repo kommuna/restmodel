@@ -109,28 +109,25 @@ class SolrModel {
                 $fieldParams = $filter[$field];
             }
 
+            if(isset($fieldParams['not']) && !is_array($fieldParams['not'])) {
+                $fieldParams['not'] = [$fieldParams['not']];
+            }
+
             if (is_array($fieldParams)) {
-
-
-                $from = $to = false;
 
                 if(isset($fieldParams['not'])) {
 
-                    if(!is_array($fieldParams['not'])) {
-                        $fieldParams['not'] = [$fieldParams['not']];
-                    }
-
-                    if(is_array($fieldParams['not'])) {
-                        foreach($fieldParams['not'] as $value) {
-                            if(is_null($value)) {
-                                $solrQuery->addFilterQuery("$field:[* TO *]");
-                            } else {
-                                $solrQuery->addFilterQuery("!$field:$value");
-                            }
+                    foreach($fieldParams['not'] as $value) {
+                        if(is_null($value)) {
+                            $solrQuery->addFilterQuery("$field:[* TO *]");
+                        } else {
+                            $solrQuery->addFilterQuery("!$field:$value");
                         }
                     }
 
                 } else {
+
+                    $from = $to = false;
 
                     if (isset($fieldParams['from']) && is_scalar($fieldParams['from'])) {
 
