@@ -114,7 +114,25 @@ class SolrModel {
 
                 $from = $to = false;
 
-                if (isset($fieldParams['from']) && is_scalar($fieldParams['from'])) {
+                if(isset($fieldParams['not'])) {
+
+                    if(is_scalar($fieldParams['not'])) {
+                        $fieldParams['not'] = [$fieldParams['not']];
+                    }
+
+                    if(is_array($fieldParams['not'])) {
+                        foreach($fieldParams['not'] as $value) {
+                            if(is_null($value)) {
+                                $solrQuery->addFilterQuery("$field:[* TO *]");
+                            } else {
+                                $solrQuery->addFilterQuery("!$field:$value");
+                            }
+                        }
+                    } elseif(is_null($fieldParams['not'])) {
+                        $solrQuery->addFilterQuery("$field:[* TO *]");
+                    }
+
+                } elseif(isset($fieldParams['from']) && is_scalar($fieldParams['from'])) {
 
                     // Date fields should end by '_on' (posted_on)
                     if (substr($field, -3) == '_on') {
