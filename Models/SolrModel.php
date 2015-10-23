@@ -110,7 +110,7 @@ class SolrModel {
             }
 
             error_log(print_r($filter,1));
-            if(array_key_exists('not', $fieldParams) && !is_array($fieldParams['not'])) {
+            if(is_array($fieldParams) && array_key_exists('not', $fieldParams) && !is_array($fieldParams['not'])) {
                 error_log("#1");
                 $fieldParams['not'] = [$fieldParams['not']];
             }
