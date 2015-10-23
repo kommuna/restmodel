@@ -110,17 +110,20 @@ class SolrModel {
             }
 
             if(isset($fieldParams['not']) && !is_array($fieldParams['not'])) {
+                error_log('#1');
                 $fieldParams['not'] = [$fieldParams['not']];
             }
 
             if (is_array($fieldParams)) {
-
+                error_log('#2');
                 if(isset($fieldParams['not'])) {
-
+                    error_log('#3');
                     foreach($fieldParams['not'] as $value) {
                         if(is_null($value)) {
+                            error_log('#4');
                             $solrQuery->addFilterQuery("$field:[* TO *]");
                         } else {
+                            error_log('#5');
                             $solrQuery->addFilterQuery("!$field:$value");
                         }
                     }
