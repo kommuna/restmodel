@@ -116,7 +116,7 @@ class SolrModel {
 
                 if(isset($fieldParams['not'])) {
 
-                    if(is_scalar($fieldParams['not'])) {
+                    if(!is_array($fieldParams['not'])) {
                         $fieldParams['not'] = [$fieldParams['not']];
                     }
 
@@ -128,8 +128,6 @@ class SolrModel {
                                 $solrQuery->addFilterQuery("!$field:$value");
                             }
                         }
-                    } elseif(is_null($fieldParams['not'])) {
-                        $solrQuery->addFilterQuery("$field:[* TO *]");
                     }
 
                 } else {
