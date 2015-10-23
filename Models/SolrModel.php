@@ -109,8 +109,8 @@ class SolrModel {
                 $fieldParams = $filter[$field];
             }
 
+            error_log(print_r($filter,1));
             if(isset($fieldParams['not']) && !is_array($fieldParams['not'])) {
-                error_log(print_r($filter,1));
                 $fieldParams['not'] = [$fieldParams['not']];
             }
 
