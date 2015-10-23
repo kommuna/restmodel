@@ -132,45 +132,48 @@ class SolrModel {
                         $solrQuery->addFilterQuery("$field:[* TO *]");
                     }
 
-                } elseif(isset($fieldParams['from']) && is_scalar($fieldParams['from'])) {
-
-                    // Date fields should end by '_on' (posted_on)
-                    if (substr($field, -3) == '_on') {
-
-                        $time = strtotime($fieldParams['from']);
-
-                        $from = $time !== false ? date("c", $time).'Z' : false;
-                    } else {
-                        $from = $fieldParams['from'];
-                    }
-                }
-
-
-                if (isset($fieldParams['to']) && is_scalar($fieldParams['to'])) {
-
-                    if (substr($field, -3) == '_on') {
-                        $time = strtotime($fieldParams['to']);
-                        $to = $time !== false ? date("c", $time).'Z' : false;
-                    } else {
-                        $to = $fieldParams['to'];
-                    }
-                }
-
-                if ($from !== false && $to !== false) {
-
-                    $solrQuery->addFilterQuery("$field:[$from TO $to]");
-
-                } elseif ($from !== false) {
-
-                    $solrQuery->addFilterQuery("$field:[$from TO *]");
-
-                } elseif ($to !== false) {
-
-                    $solrQuery->addFilterQuery("$field:[* TO $to]");
-
                 } else {
-                    $solrQuery->addFilterQuery("$field:(" . implode(' OR ', $fieldParams) . ")");
 
+                    if (isset($fieldParams['from']) && is_scalar($fieldParams['from'])) {
+
+                        // Date fields should end by '_on' (posted_on)
+                        if (substr($field, -3) == '_on') {
+
+                            $time = strtotime($fieldParams['from']);
+
+                            $from = $time !== false ? date("c", $time) . 'Z' : false;
+                        } else {
+                            $from = $fieldParams['from'];
+                        }
+                    }
+
+
+                    if (isset($fieldParams['to']) && is_scalar($fieldParams['to'])) {
+
+                        if (substr($field, -3) == '_on') {
+                            $time = strtotime($fieldParams['to']);
+                            $to = $time !== false ? date("c", $time) . 'Z' : false;
+                        } else {
+                            $to = $fieldParams['to'];
+                        }
+                    }
+
+                    if ($from !== false && $to !== false) {
+
+                        $solrQuery->addFilterQuery("$field:[$from TO $to]");
+
+                    } elseif ($from !== false) {
+
+                        $solrQuery->addFilterQuery("$field:[$from TO *]");
+
+                    } elseif ($to !== false) {
+
+                        $solrQuery->addFilterQuery("$field:[* TO $to]");
+
+                    } else {
+                        $solrQuery->addFilterQuery("$field:(" . implode(' OR ', $fieldParams) . ")");
+
+                    }
                 }
 
 
