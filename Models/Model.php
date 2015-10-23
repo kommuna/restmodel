@@ -262,9 +262,11 @@ abstract class Model {
                 $fieldParams['not'] = [$fieldParams['not']];
             }
 
+            error_log('#1' .print_r($fieldParams,1));
             if(is_array($fieldParams)) {
-
+                error_log('#2');
                 if(isset($fieldParams['not'])) {
+                    error_log('#3');
                     $orm->where_not_in($field, array_values($fieldParams));
                     /*foreach($fieldParams['not'] as $value) {
                         if(is_null($value)) {
