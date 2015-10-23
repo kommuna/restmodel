@@ -158,11 +158,15 @@ abstract class Model {
         if(!isset($this->fields[$field])) {
 
             $this->setError($field, "Field doesn't exist");
+            return false;
 
         } elseif($this->fields[$field] && !$this->fields[$field]->validate($value)) {
 
             $this->setError($field, "Missing or invalid value");
+            return false;
         }
+
+        return true;
 
     }
 
