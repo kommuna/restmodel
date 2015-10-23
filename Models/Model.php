@@ -265,7 +265,7 @@ abstract class Model {
             if(is_array($fieldParams)) {
 
                 if(isset($fieldParams['not'])) {
-                    $orm->where_not_equal($field, $fieldParams);
+                    $orm->where_not_in($field, $fieldParams);
                     /*foreach($fieldParams['not'] as $value) {
                         if(is_null($value)) {
                             $orm->where_not_null($field)
