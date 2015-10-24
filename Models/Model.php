@@ -262,7 +262,7 @@ abstract class Model {
                 $fieldParams['not'] = [$fieldParams['not']];
             }
 
-            $orm->where_in('category_id', [1,2,3]);
+            $orm->where_in('site_id', [1,2,3]);
 
             error_log('#1' .print_r($fieldParams,1));
             if(is_array($fieldParams)) {
