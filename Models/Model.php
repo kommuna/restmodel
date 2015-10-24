@@ -262,7 +262,7 @@ abstract class Model {
                 $fieldParams['not'] = [$fieldParams['not']];
             }
 
-            $orm->where_in('site_id', [1,2,3]);
+            //$orm->where_not_in('site_id', [1,2,3]);
 
             error_log('#1' .print_r($fieldParams,1));
             if(is_array($fieldParams)) {
@@ -270,7 +270,7 @@ abstract class Model {
                 if(isset($fieldParams['not'])) {
                     error_log('#3');
 
-                    //$orm->where_not_in($field, array_values($fieldParams));
+                    $orm->where_not_in($field, array_values($fieldParams['not']));
                     /*foreach($fieldParams['not'] as $value) {
                         if(is_null($value)) {
                             $orm->where_not_null($field)
