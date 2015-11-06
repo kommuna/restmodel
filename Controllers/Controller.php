@@ -10,6 +10,12 @@ use Slim\Slim;
 
 class Controller {
 
+    public function __construct() {
+
+        $this->app = \Slim\Slim::getInstance();
+
+    }
+
     protected static function getControllerName($controllerName) {
         return "{$controllerName}Controller";
     }
