@@ -12,6 +12,7 @@ class SolrModel {
     protected $client;
     protected $logger;
     protected $totalResultSetCount = 0;
+    protected $fields = [];
 
     public function __construct($config, $logger) {
 
@@ -29,24 +30,17 @@ class SolrModel {
         return $this->validators;
     }
 
+    public function addFields($fields) {
+        $this->fields = $fields;
+    }
+
     public function getMany($params = null) {
 
         $query = new SolrQuery();
 
-        $query->addField('id')
-            ->addField('code')
-            ->addField('category_id')
-            ->addField('name')
-            ->addField('description')
-            ->addField('activated_on')
-            ->addField('is_param_1')
-            ->addField('views_counter')
-            ->addField('votes_positive')
-            ->addField('votes_negative')
-            ->addField('favorites_counter')
-            ->addField('promo_title')
-            ->addField('promo_url')
-            ->addField('site');
+        foreach($this->fields as $f) {
+            $query->addField($f);
+        }
 
         $query->setQuery($params && $params->getQuery() ? $params->getQuery() : '*:*');
 
