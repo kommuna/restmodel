@@ -32,6 +32,7 @@ class SolrModel {
 
     public function addFields($fields) {
         $this->fields = $fields;
+        return $this;
     }
 
     public function getMany($params = null) {
