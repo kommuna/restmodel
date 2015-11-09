@@ -196,7 +196,7 @@ class SolrModel {
             }
         }
 
-        die(print_r($solrQuery->getFilterQueries(),1));
+        die(print_r($solrQuery->getExpandQuery(),1));
 
         return $solrQuery;
     }
