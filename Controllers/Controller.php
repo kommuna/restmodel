@@ -129,12 +129,12 @@ class Controller {
 
     }
 
-    public function fetch($template, $params) {
+    public function fetch($template, $params = []) {
         $this->app->view->appendData($params);
         return $this->app->view->fetch($template, $params);
     }
 
-    public function render($template, $params) {
+    public function render($template, $params = []) {
         $this->app->render($template, $params);
     }
 
