@@ -131,10 +131,15 @@ class Controller {
 
     public function fetch($template, $params = []) {
         $this->app->view->appendData($params);
+        $params['isMobile'] = (property_exists($app, 'isMobile') && $app->isMobile) || !empty($params['isMobile']);
+        $params['isAndroid'] = (property_exists($app, 'isAndroid') && $app->isAndroid) || !empty($params['isAndroid']);
         return $this->app->view->fetch($template, $params);
     }
 
     public function render($template, $params = []) {
+        $app = Slim::getInstance();
+        $params['isMobile'] = (property_exists($app, 'isMobile') && $app->isMobile) || !empty($params['isMobile']);
+        $params['isAndroid'] = (property_exists($app, 'isAndroid') && $app->isAndroid) || !empty($params['isAndroid']);
         $this->app->render($template, $params);
     }
 
