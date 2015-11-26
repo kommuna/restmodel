@@ -131,14 +131,10 @@ class Controller {
 
     public function fetch($template, $params = []) {
         $this->app->view->appendData($params);
-        $params['isMobile'] = (property_exists($this->app, 'isMobile') && $this->app->isMobile) || !empty($params['isMobile']);
-        $params['isAndroid'] = (property_exists($this->app, 'isAndroid') && $this->app->isAndroid) || !empty($params['isAndroid']);
         return $this->app->view->fetch($template, $params);
     }
 
     public function render($template, $params = []) {
-        $params['isMobile'] = (property_exists($this->app, 'isMobile') && $this->app->isMobile) || !empty($params['isMobile']);
-        $params['isAndroid'] = (property_exists($this->app, 'isAndroid') && $this->app->isAndroid) || !empty($params['isAndroid']);
         $this->app->render($template, $params);
     }
 
