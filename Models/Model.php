@@ -243,116 +243,118 @@ abstract class Model {
             return $orm;
         }
 
-        $filter = $params->getFilter();
+        $filters = $params->getFilter();
         $fields = $this->getFieldsValidators();
 
-        foreach(array_keys($fields) as $field) {
+        foreach($filters as $filter) {
+            foreach(array_keys($fields) as $field) {
 
-            if(!array_key_exists($field, $filter)) {
-                continue;
-            } else {
-
-                $fieldParams = $filter[$field];
-
-            }
-
-            $fromToFlag = false;
-
-            if(is_array($fieldParams) && array_key_exists('not', $fieldParams) && !is_array($fieldParams['not'])) {
-                $fieldParams['not'] = [$fieldParams['not']];
-            }
-
-            if(is_array($fieldParams)) {
-                if(isset($fieldParams['not'])) {
-                    foreach($fieldParams['not'] as $value) {
-                        if(is_null($value)) {
-                            $orm->where_not_null($field);
-                        } else {
-                            $orm->where_not_equal($field, $value);
-                        }
-                    }
-
+                if(!array_key_exists($field, $filter)) {
+                    continue;
                 } else {
 
-                    if (isset($fieldParams['from']) && is_scalar($fieldParams['from'])) {
+                    $fieldParams = $filter[$field];
 
-                        // Date fields should end by '_on' (posted_on)
-                        if (substr($field, 0, 3) != 'is_' && substr($field, -3) == '_on') {
-
-                            $time = strtotime($fieldParams['from']);
-
-                            $from = $time !== false ? date("Y-m-d H:i:s", $time) : false;
-                        } else {
-                            $from = $fieldParams['from'];
-                        }
-
-                        if ($fields[$field] && !$fields[$field]->validate($from)) {
-                            ModelException::throwException("Wrong '$field' parameter");
-                        }
-
-                        if ($from !== false) {
-                            $orm->where_gte($field, $from);
-                            $fromToFlag = true;
-                        }
-                    }
-
-
-                    if (isset($fieldParams['to']) && is_scalar($fieldParams['to'])) {
-
-                        if (substr($field, 0, 3) != 'is_' && substr($field, -3) == '_on') {
-                            $time = strtotime($fieldParams['to']);
-                            $to = $time !== false ? date("Y-m-d H:i:s", $time) : false;
-                        } else {
-                            $to = $fieldParams['to'];
-                        }
-
-                        if ($fields[$field] && !$fields[$field]->validate($to)) {
-                            ModelException::throwException("Wrong '$field' parameter");
-                        }
-
-                        if ($to !== false) {
-                            $orm->where_lte($field, $to);
-                            $fromToFlag = true;
-                        }
-                    }
-
-                    if (!$fromToFlag) {
-                        $orm->where_in($field, $fieldParams);
-                    }
                 }
-            } else {
 
-                if (is_null($fieldParams)) {
-                    $orm->where_null($field);
-                } else {
+                $fromToFlag = false;
 
-                    // Logical fields should start by 'is_' (is_logo_on)
-                    if (substr($field, 0, 3) == 'is_') {
-                        $fieldParams = !!$fieldParams;
-                    } // Date fields should end by '_on' (posted_on)
-                    elseif (substr($field, -3) == '_on') {
+                if(is_array($fieldParams) && array_key_exists('not', $fieldParams) && !is_array($fieldParams['not'])) {
+                    $fieldParams['not'] = [$fieldParams['not']];
+                }
 
-                        if($fields[$field] && !$fields[$field]->validate($fieldParams)) {
-                            ModelException::throwException("Wrong '$field' parameter");
+                if(is_array($fieldParams)) {
+                    if(isset($fieldParams['not'])) {
+                        foreach($fieldParams['not'] as $value) {
+                            if(is_null($value)) {
+                                $orm->where_not_null($field);
+                            } else {
+                                $orm->where_not_equal($field, $value);
+                            }
                         }
 
-                        $time = strtotime($fieldParams);
-                        $fieldParams = $time !== false ? date("Y-m-d H:i:s", $time) : false;
-                    }
-
-                    if (strpos($fieldParams, '%') !== false) {
-                        $orm->where_like($field, $fieldParams);
                     } else {
 
-                        if($fields[$field] && !$fields[$field]->validate($fieldParams)) {
-                            ModelException::throwException("Wrong '$field' parameter");
+                        if (isset($fieldParams['from']) && is_scalar($fieldParams['from'])) {
+
+                            // Date fields should end by '_on' (posted_on)
+                            if (substr($field, 0, 3) != 'is_' && substr($field, -3) == '_on') {
+
+                                $time = strtotime($fieldParams['from']);
+
+                                $from = $time !== false ? date("Y-m-d H:i:s", $time) : false;
+                            } else {
+                                $from = $fieldParams['from'];
+                            }
+
+                            if ($fields[$field] && !$fields[$field]->validate($from)) {
+                                ModelException::throwException("Wrong '$field' parameter");
+                            }
+
+                            if ($from !== false) {
+                                $orm->where_gte($field, $from);
+                                $fromToFlag = true;
+                            }
                         }
 
-                        $orm->where_equal($field, $fieldParams);
+
+                        if (isset($fieldParams['to']) && is_scalar($fieldParams['to'])) {
+
+                            if (substr($field, 0, 3) != 'is_' && substr($field, -3) == '_on') {
+                                $time = strtotime($fieldParams['to']);
+                                $to = $time !== false ? date("Y-m-d H:i:s", $time) : false;
+                            } else {
+                                $to = $fieldParams['to'];
+                            }
+
+                            if ($fields[$field] && !$fields[$field]->validate($to)) {
+                                ModelException::throwException("Wrong '$field' parameter");
+                            }
+
+                            if ($to !== false) {
+                                $orm->where_lte($field, $to);
+                                $fromToFlag = true;
+                            }
+                        }
+
+                        if (!$fromToFlag) {
+                            $orm->where_in($field, $fieldParams);
+                        }
+                    }
+                } else {
+
+                    if (is_null($fieldParams)) {
+                        $orm->where_null($field);
+                    } else {
+
+                        // Logical fields should start by 'is_' (is_logo_on)
+                        if (substr($field, 0, 3) == 'is_') {
+                            $fieldParams = !!$fieldParams;
+                        } // Date fields should end by '_on' (posted_on)
+                        elseif (substr($field, -3) == '_on') {
+
+                            if($fields[$field] && !$fields[$field]->validate($fieldParams)) {
+                                ModelException::throwException("Wrong '$field' parameter");
+                            }
+
+                            $time = strtotime($fieldParams);
+                            $fieldParams = $time !== false ? date("Y-m-d H:i:s", $time) : false;
+                        }
+
+                        if (strpos($fieldParams, '%') !== false) {
+                            $orm->where_like($field, $fieldParams);
+                        } else {
+
+                            if($fields[$field] && !$fields[$field]->validate($fieldParams)) {
+                                ModelException::throwException("Wrong '$field' parameter");
+                            }
+
+                            $orm->where_equal($field, $fieldParams);
+                        }
+
                     }
 
                 }
-
             }
         }
 

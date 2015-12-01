@@ -106,7 +106,7 @@ class apiParams {
     }
 
     public function setFilter($value) {
-        $this->filter = $value;
+        $this->filter[] = $value;
         return $this;
     }
 

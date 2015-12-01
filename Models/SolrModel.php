@@ -93,106 +93,105 @@ class SolrModel {
             return $solrQuery;
         }
 
-        $filter = $params->getFilter();
+        $filters = $params->getFilter();
         $fields = $this->getFieldsValidators();
 
-        foreach (array_keys($fields) as $field) {
+        foreach ($filters as $filter) {
 
-            if (!array_key_exists($field, $filter)) {
-                continue;
-            } else {
-                $fieldParams = $filter[$field];
-            }
+            foreach (array_keys($fields) as $field) {
 
-            if(is_array($fieldParams) && array_key_exists('not', $fieldParams) && !is_array($fieldParams['not'])) {
-                $fieldParams['not'] = [$fieldParams['not']];
-            }
-
-            if (is_array($fieldParams)) {
-                if(isset($fieldParams['not'])) {
-                    foreach($fieldParams['not'] as $value) {
-                        if(is_null($value)) {
-                            $solrQuery->addFilterQuery("$field:[* TO *]");
-                        } else {
-                            $solrQuery->addFilterQuery("!$field:$value");
-                        }
-                    }
-
+                if (!array_key_exists($field, $filter)) {
+                    continue;
                 } else {
+                    $fieldParams = $filter[$field];
+                }
 
-                    $from = $to = false;
+                if (is_array($fieldParams) && array_key_exists('not', $fieldParams) && !is_array($fieldParams['not'])) {
+                    $fieldParams['not'] = [$fieldParams['not']];
+                }
 
-                    if (isset($fieldParams['from']) && is_scalar($fieldParams['from'])) {
-
-                        // Date fields should end by '_on' (posted_on)
-                        if (substr($field, -3) == '_on') {
-
-                            $time = strtotime($fieldParams['from']);
-
-                            $from = $time !== false ? date("c", $time) . 'Z' : false;
-                        } else {
-                            $from = $fieldParams['from'];
+                if (is_array($fieldParams)) {
+                    if (isset($fieldParams['not'])) {
+                        foreach ($fieldParams['not'] as $value) {
+                            if (is_null($value)) {
+                                $solrQuery->addFilterQuery("$field:[* TO *]");
+                            } else {
+                                $solrQuery->addFilterQuery("!$field:$value");
+                            }
                         }
-                    }
-
-
-                    if (isset($fieldParams['to']) && is_scalar($fieldParams['to'])) {
-
-                        if (substr($field, -3) == '_on') {
-                            $time = strtotime($fieldParams['to']);
-                            $to = $time !== false ? date("c", $time) . 'Z' : false;
-                        } else {
-                            $to = $fieldParams['to'];
-                        }
-                    }
-
-                    if ($from !== false && $to !== false) {
-
-                        $solrQuery->addFilterQuery("$field:[$from TO $to]");
-
-                    } elseif ($from !== false) {
-
-                        $solrQuery->addFilterQuery("$field:[$from TO *]");
-
-                    } elseif ($to !== false) {
-
-                        $solrQuery->addFilterQuery("$field:[* TO $to]");
 
                     } else {
-                        $solrQuery->addFilterQuery("$field:(" . implode(' OR ', $fieldParams) . ")");
 
+                        $from = $to = false;
+
+                        if (isset($fieldParams['from']) && is_scalar($fieldParams['from'])) {
+
+                            // Date fields should end by '_on' (posted_on)
+                            if (substr($field, -3) == '_on') {
+
+                                $time = strtotime($fieldParams['from']);
+
+                                $from = $time !== false ? date("c", $time) . 'Z' : false;
+                            } else {
+                                $from = $fieldParams['from'];
+                            }
+                        }
+
+
+                        if (isset($fieldParams['to']) && is_scalar($fieldParams['to'])) {
+
+                            if (substr($field, -3) == '_on') {
+                                $time = strtotime($fieldParams['to']);
+                                $to = $time !== false ? date("c", $time) . 'Z' : false;
+                            } else {
+                                $to = $fieldParams['to'];
+                            }
+                        }
+
+                        if ($from !== false && $to !== false) {
+
+                            $solrQuery->addFilterQuery("$field:[$from TO $to]");
+
+                        } elseif ($from !== false) {
+
+                            $solrQuery->addFilterQuery("$field:[$from TO *]");
+
+                        } elseif ($to !== false) {
+
+                            $solrQuery->addFilterQuery("$field:[* TO $to]");
+
+                        } else {
+                            $solrQuery->addFilterQuery("$field:(" . implode(' OR ', $fieldParams) . ")");
+
+                        }
                     }
-                }
 
-
-            } else {
-
-
-                //http://stackoverflow.com/questions/4238609/how-to-query-solr-for-empty-fields
-                if(is_null($fieldParams)) {
-                    $solrQuery->addFilterQuery("-$field:[* TO *]");
-                }
-
-                // Logical fields should start by 'is_' (is_logo_on)
-                elseif (substr($field, 0, 3) == 'is_') {
-
-                    $fieldParams = $fieldParams  ? 'true' : 'false';
-
-
-                    $solrQuery->addFilterQuery("$field:$fieldParams");
-                }
-                // Date fields should end by '_on' (posted_on)
-                elseif (substr($field, -3) == '_on') {
-
-                    $time = strtotime($fieldParams);
-                    $fieldParams = $time !== false ? date("c", $time).'Z' : false;
 
                 } else {
-                    $solrQuery->addFilterQuery("$field:$fieldParams");
+
+
+                    //http://stackoverflow.com/questions/4238609/how-to-query-solr-for-empty-fields
+                    if (is_null($fieldParams)) {
+                        $solrQuery->addFilterQuery("-$field:[* TO *]");
+                    } // Logical fields should start by 'is_' (is_logo_on)
+                    elseif (substr($field, 0, 3) == 'is_') {
+
+                        $fieldParams = $fieldParams ? 'true' : 'false';
+
+
+                        $solrQuery->addFilterQuery("$field:$fieldParams");
+                    } // Date fields should end by '_on' (posted_on)
+                    elseif (substr($field, -3) == '_on') {
+
+                        $time = strtotime($fieldParams);
+                        $fieldParams = $time !== false ? date("c", $time) . 'Z' : false;
+
+                    } else {
+                        $solrQuery->addFilterQuery("$field:$fieldParams");
+                    }
+
+
                 }
-
-
-
             }
         }
 
