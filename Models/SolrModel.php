@@ -195,7 +195,7 @@ class SolrModel {
             }
         }
 
-        error_log(print_r($solrQuery->getQuery(),1));
+        error_log(print_r($solrQuery->getFilterQueries(),1));
 
         return $solrQuery;
     }
