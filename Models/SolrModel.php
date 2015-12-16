@@ -39,65 +39,41 @@ class SolrModel {
 
         $query = new SolrQuery();
 
-        error_log('#1');
-
         foreach($this->fields as $f) {
             $query->addField($f);
         }
 
-        error_log('#2');
-
         $query->setQuery($params && $params->getQuery() ? $params->getQuery() : '*:*');
-
-        error_log('#3');
 
         if($params && $params->getOffset()) {
             $query->setStart($params->getOffset());
         }
 
-        error_log('#4');
-
         if($params && $params->getLimit()) {
             $query->setRows($params->getLimit());
         }
 
-        error_log('#5');
-
         $this->applyFilter($query, $params);
-
-        error_log('#6');
         $this->applyOrder($query, $params);
 
-        error_log('#7');
 
         try {
             $queryResponse = $this->client->query($query);
-            error_log('#8');
         } catch(\SolrClientException $e) {
             $this->logger->addDebug(print_r($e->getInternalInfo(), 1));
             throw $e;
         }
 
-        error_log('#9');
-
-
         if($queryResponse->success()) {
-
-            error_log('#10');
-
             $response = $queryResponse->getResponse();
-            error_log('#11');
             $this->totalResultSetCount = (int)$response['response']['numFound'];
             $response = $response['response']['docs'];
 
         } else {
             $response = [];
         }
-        error_log('#12');
 
         return $response;
-
-
     }
 
 
