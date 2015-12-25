@@ -43,7 +43,7 @@ class SolrModel {
             $query->addField($f);
         }
 
-        $query->setQuery($params && $params->getQuery() ? $params->getQuery() : '* : *');
+        $query->setQuery($params && $params->getQuery() ? $params->getQuery() : '*:*');
 
         if($params && $params->getOffset()) {
             $query->setStart($params->getOffset());

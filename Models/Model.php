@@ -423,7 +423,13 @@ abstract class Model {
         return $orm->find_array();
     }
 
+    protected function beforeDelete() {
+
+    }
+
     public function delete($id) {
+
+        $this->beforeDelete();
 
         $row = ORM::for_table($this->tableName, $this->connectionName)->find_one($id);
 
