@@ -44,6 +44,7 @@ class SolrModel {
         }
 
         $q = $params && $params->getQuery() ? str_replace(["'",'"'], "", trim($params->getQuery())) : '*:*';
+        error_log($q);
         $query->setQuery($q);
 
         if($params && $params->getOffset()) {
