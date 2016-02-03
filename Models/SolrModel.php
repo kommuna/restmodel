@@ -43,8 +43,8 @@ class SolrModel {
             $query->addField($f);
         }
 
-        $query = str_replace(["'",'"'], "", trim($params->getQuery()));
-        $query->setQuery($params && $params->getQuery() ? $query : '*:*');
+        $q = $params && $params->getQuery() ? str_replace(["'",'"'], "", trim($params->getQuery())) : '*:*';
+        $query->setQuery($q);
 
         if($params && $params->getOffset()) {
             $query->setStart($params->getOffset());
