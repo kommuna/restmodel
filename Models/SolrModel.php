@@ -43,7 +43,8 @@ class SolrModel {
             $query->addField($f);
         }
 
-        $query->setQuery($params && $params->getQuery() ? addslashes($params->getQuery()) : '*:*');
+        $query = str_replace(array("'",'"'), "", trim($params->getQuery()));
+        $query->setQuery($params && $params->getQuery() ? $query : '*:*');
 
         if($params && $params->getOffset()) {
             $query->setStart($params->getOffset());
@@ -54,6 +55,7 @@ class SolrModel {
         }
 
         $this->applyFilter($query, $params);
+
         $this->applyOrder($query, $params);
 
 
