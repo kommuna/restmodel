@@ -45,7 +45,6 @@ class SolrModel {
 
         $q = ($params && $params->getQuery() ? str_replace(["'",'"'], "", trim($params->getQuery())) : '*:*');
 
-        error_log(print_r($params->getFilter(),1));
         $query->setQuery($q);
 
         if($params && $params->getOffset()) {
@@ -56,7 +55,7 @@ class SolrModel {
             $query->setRows($params->getLimit());
         }
 
-        //$this->applyFilter($query, $params);
+        $this->applyFilter($query, $params);
 
         $this->applyOrder($query, $params);
 
