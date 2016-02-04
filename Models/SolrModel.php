@@ -14,6 +14,15 @@ class SolrModel {
     protected $totalResultSetCount = 0;
     protected $fields = [];
 
+    public static function escapeSolrValue($string) {
+        $match = array('\\', '+', '-', '&', '|', '!', '(', ')', '{', '}', '[', ']', '^', '~', '*', '?', ':', '"', ';', ' ');
+        $replace = array('\\\\', '\\+', '\\-', '\\&', '\\|', '\\!', '\\(', '\\)', '\\{', '\\}', '\\[', '\\]', '\\^', '\\~', '\\*', '\\?', '\\:', '\\"', '\\;', '\\ ');
+        $string = str_replace($match, $replace, $string);
+
+        return $string;
+    }
+
+
     public function __construct($config, $logger) {
 
         $this->logger = $logger;
@@ -102,7 +111,7 @@ class SolrModel {
                 if (!array_key_exists($field, $filter)) {
                     continue;
                 } else {
-                    $fieldParams = $filter[$field];
+                    $fieldParams = self::escapeSolrValue($filter[$field]);
                 }
 
                 if (is_array($fieldParams) && array_key_exists('not', $fieldParams) && !is_array($fieldParams['not'])) {
