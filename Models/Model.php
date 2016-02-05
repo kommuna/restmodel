@@ -70,7 +70,7 @@ abstract class Model {
 
     }
 
-    protected function setFieldsValidators($validators) {
+    public function setFieldsValidators($validators) {
         $this->validators = $validators;
     }
 
