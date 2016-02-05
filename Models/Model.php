@@ -72,6 +72,7 @@ abstract class Model {
 
     public function setFieldsValidators($validators) {
         $this->validators = $validators;
+        return $this;
     }
 
     protected function flushValues() {
