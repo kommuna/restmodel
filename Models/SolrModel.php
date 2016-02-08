@@ -55,6 +55,8 @@ class SolrModel {
         $q = $params && $params->getQuery() ? self::escapeSolrValue(trim($params->getQuery())) : false;
         $q = $q ? $q : "*:*";
 
+        error_log($q);
+
         $query->setQuery($q);
 
         if($params && $params->getOffset()) {
