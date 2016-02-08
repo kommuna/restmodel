@@ -52,7 +52,8 @@ class SolrModel {
             $query->addField($f);
         }
 
-        $q = ($params && $params->getQuery() ? str_replace(["'",'"'], "", trim($params->getQuery())) : '*:*');
+        $q = $params && $params->getQuery() ? self::escapeSolrValue(trim($params->getQuery())) : false;
+        $q = $q ? "($q)" : "*:*";
 
         $query->setQuery($q);
 
