@@ -53,7 +53,7 @@ class SolrModel {
         }
 
         $q = $params && $params->getQuery() ? self::escapeSolrValue(trim($params->getQuery())) : false;
-        $q = $q ? "($q)" : "*:*";
+        $q = $q ? $q : "*:*";
 
         $query->setQuery($q);
 
