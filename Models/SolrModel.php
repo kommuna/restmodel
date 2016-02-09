@@ -55,8 +55,6 @@ class SolrModel {
         $q = $params && $params->getQuery() ? self::escapeSolrValue(trim($params->getQuery())) : false;
         $q = $q ? $q : "*:*";
 
-        error_log($params->getQuery());
-
         $query->setQuery($q);
 
         if($params && $params->getOffset()) {
@@ -234,6 +232,10 @@ class SolrModel {
             $orderField = $orderField[0];
 
             $fields = $this->getFieldsValidators();
+
+            if($orderField === 'random') {
+                $solrQuery->addSortField($orderField . uniqid('_'), \SolrQuery::ORDER_DESC);
+            }
 
             if(!isset($fields[$orderField])) {
                 continue;
