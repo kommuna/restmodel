@@ -234,7 +234,8 @@ class SolrModel {
             $fields = $this->getFieldsValidators();
 
             if($orderField === 'random') {
-                $solrQuery->addSortField($orderField . uniqid('_'), \SolrQuery::ORDER_DESC);
+                $randStr = substr(preg_replace("/[^a-zA-Z0-9]/","",$order[$orderField]), 0, 16);
+                $solrQuery->addSortField("{$orderField}_{$randStr}", \SolrQuery::ORDER_DESC);
             }
 
             if(!isset($fields[$orderField])) {
