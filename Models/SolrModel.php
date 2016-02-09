@@ -233,8 +233,8 @@ class SolrModel {
 
             $fields = $this->getFieldsValidators();
 
-            if($orderField === 'random') {
-                $randStr = substr(preg_replace("/[^a-zA-Z0-9]/","",$order[$orderField]), 0, 16);
+            if($orderField === 'random' && $order[$orderField]) {
+                $randStr = substr(preg_replace("/[^a-zA-Z0-9]/", "", $order[$orderField]), 0, 16);
                 $solrQuery->addSortField("{$orderField}_{$randStr}", \SolrQuery::ORDER_DESC);
             }
 
