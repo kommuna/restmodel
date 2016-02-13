@@ -23,7 +23,7 @@ class SolrModel {
         return $string;
     }
 
-    public static function convertSearchValue($string) {
+    public static function convertFilterStrValue($string) {
 
         if(!$string) {
             return $string;
@@ -135,7 +135,7 @@ class SolrModel {
                     continue;
                 } else {
                     $fieldParams = self::escapeSolrValue($filter[$field]);
-                    $fieldParams = self::convertSearchValue($fieldParams);
+                    $fieldParams = is_string($fieldParams) ? self::convertFilterStrValue($fieldParams) : $fieldParams;
                 }
 
                 if (is_array($fieldParams) && array_key_exists('not', $fieldParams) && !is_array($fieldParams['not'])) {
