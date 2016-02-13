@@ -16,9 +16,30 @@ class SolrModel {
 
     public static function escapeSolrValue($string) {
 
-        $match = array('\\', '+', '-', '&', '|', '!', '(', ')', '{', '}', '[', ']', /*'^',*/ '~', '*', '?', ':', '"', ';', ' ');
-        $replace = array('\\\\', '\\+', '\\-', '\\&', '\\|', '\\!', '\\(', '\\)', '\\{', '\\}', '\\[', '\\]', /*'\\^',*/ '\\~', '\\*', '\\?', '\\:', '\\"', '\\;', '\\ ');
+        $match = array('\\', '+', '-', '&', '|', '!', '(', ')', '{', '}', '[', ']', '^', '~', '*', '?', ':', '"', ';', ' ');
+        $replace = array('\\\\', '\\+', '\\-', '\\&', '\\|', '\\!', '\\(', '\\)', '\\{', '\\}', '\\[', '\\]', '\\^', '\\~', '\\*', '\\?', '\\:', '\\"', '\\;', '\\ ');
         $string = str_replace($match, $replace, $string);
+
+        return $string;
+    }
+
+    public static function convertSearchValue($string) {
+
+        if(!$string) {
+            return $string;
+        }
+
+        $firstChar = mb_substr($string, 0, 1);
+
+        if($firstChar !== false) {
+            $string = $firstChar == '%' ? mb_substr($string, 1) : "^$string";
+        }
+
+        $lastChar = mb_substr($string, -1, 1);
+
+        if($lastChar !== false) {
+            $string = $lastChar == '%' ? mb_substr($string, -1) : "$string$";
+        }
 
         return $string;
     }
@@ -114,6 +135,7 @@ class SolrModel {
                     continue;
                 } else {
                     $fieldParams = self::escapeSolrValue($filter[$field]);
+                    $fieldParams = self::convertSearchValue($fieldParams);
                 }
 
                 if (is_array($fieldParams) && array_key_exists('not', $fieldParams) && !is_array($fieldParams['not'])) {
