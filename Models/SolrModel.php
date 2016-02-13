@@ -41,7 +41,7 @@ class SolrModel {
             $string = $lastChar == '%' ? mb_substr($string, -1) : "$string$";
         }
 
-        return '"$string"';
+        return '"'.$string.'"';
     }
 
 
