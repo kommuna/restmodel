@@ -136,7 +136,7 @@ class SolrModel {
                 } else {
                     if(!is_array($filter[$field])) {
                         $fieldParams = self::escapeSolrValue($filter[$field]);
-                        $fieldParams = self::convertFilterStrValue($fieldParams);
+                        //$fieldParams = self::convertFilterStrValue($fieldParams);
                     } else {
                         $fieldParams = $filter[$field];
                     }
@@ -231,7 +231,7 @@ class SolrModel {
             }
         }
 
-        error_log(print_r($solrQuery->getFilterQueries(),1));
+        //error_log(print_r($solrQuery->getFilterQueries(),1));
 
         return $solrQuery;
     }
