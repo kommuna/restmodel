@@ -134,8 +134,12 @@ class SolrModel {
                 if (!array_key_exists($field, $filter)) {
                     continue;
                 } else {
-                    $fieldParams = self::escapeSolrValue($filter[$field]);
-                    $fieldParams = self::convertFilterStrValue($fieldParams);
+                    if(!is_array($filter[$field])) {
+                        $fieldParams = self::escapeSolrValue($filter[$field]);
+                        $fieldParams = self::convertFilterStrValue($fieldParams);
+                    } else {
+                        $fieldParams = $filter[$field];
+                    }
                 }
 
                 if (is_array($fieldParams) && array_key_exists('not', $fieldParams) && !is_array($fieldParams['not'])) {
