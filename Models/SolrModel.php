@@ -171,10 +171,10 @@ class SolrModel {
         $query = $this->getQuery();
 
         if (is_scalar($fieldValue)) {
-            $notValues = $fieldValue ? [$fieldValue] : [];
+            $fieldValue = $fieldValue ? [$fieldValue] : [];
         }
 
-        foreach ($notValues as $val) {
+        foreach ($fieldValue as $val) {
             if(!is_scalar($val)) {
                 continue;
             } else {
