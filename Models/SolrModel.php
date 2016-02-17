@@ -285,17 +285,9 @@ class SolrModel {
 
                 if (!array_key_exists($field, $filter)) {
                     continue;
-                } else {
-
-                    $fielType = self::getFieldType($field);
-
-                    if(!is_array($filter[$field])) {
-                        $fieldParams = self::escapeSolrValue($filter[$field]);
-                        $fieldParams = self::convertFilterStrValue($fieldParams);
-                    } else {
-                        $fieldParams = $filter[$field];
-                    }
                 }
+
+                $fieldParams = $filter[$field];
 
                 if (is_array($fieldParams)) {
 
