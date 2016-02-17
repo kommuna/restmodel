@@ -319,7 +319,7 @@ class SolrModel {
             }
         }
 
-        //error_log(print_r($this->query->getFilterQueries(),1));
+        error_log("Solr URL:" . print_r($this->query->getFilterQueries(),1));
 
         return $query;
     }
