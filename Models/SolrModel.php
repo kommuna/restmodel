@@ -261,6 +261,7 @@ class SolrModel {
         }
 
         $fieldValue = self::sanitizeSolrFieldValue($fieldName, $fieldValue);
+        $fieldValue = self::convertFilterStrValue($fieldValue);
 
         $query->addFilterQuery("$fieldName:$fieldValue");
 
