@@ -8,19 +8,45 @@ use \SolrQuery;
 
 class SolrModel {
 
+    const FIELD_STRING = 0;
+    const FIELD_DATETIME = 1;
+    const FIELD_BOOLEAN = 2;
+
     protected $validators = [];
     protected $client;
     protected $logger;
     protected $totalResultSetCount = 0;
     protected $fields = [];
+    protected $query;
 
-    public static function escapeSolrValue($string) {
 
-        $match = array('\\', '+', '-', '&', '|', '!', '(', ')', '{', '}', '[', ']', '^', '~', '*', '?', ':', '"', ';', ' ');
-        $replace = array('\\\\', '\\+', '\\-', '\\&', '\\|', '\\!', '\\(', '\\)', '\\{', '\\}', '\\[', '\\]', '\\^', '\\~', '\\*', '\\?', '\\:', '\\"', '\\;', '\\ ');
-        $string = str_replace($match, $replace, $string);
+    public static function sanitizeSolrFieldValue($fieldName, $fieldValue) {
 
-        return $string;
+        $fieldType = self::getFieldType($fieldName);
+
+        switch($fieldType) {
+            case self::FIELD_BOOLEAN:
+                // Logical fields should start by 'is_' (is_logo_on)
+                $fieldValue = $fieldValue ? 'true' : 'false';
+                break;
+
+            case self::FIELD_DATETIME:
+                $time = strtotime($fieldValue);
+                if($time !== false) {
+                    $fieldValue = date("c", $time) . 'Z';
+                } else {
+                    ModelException::throwException('Wrong format of datetime value!');
+                }
+                break;
+
+            default:
+                $match = array('\\', '+', '-', '&', '|', '!', '(', ')', '{', '}', '[', ']', '^', '~', '*', '?', ':', '"', ';', ' ');
+                $replace = array('\\\\', '\\+', '\\-', '\\&', '\\|', '\\!', '\\(', '\\)', '\\{', '\\}', '\\[', '\\]', '\\^', '\\~', '\\*', '\\?', '\\:', '\\"', '\\;', '\\ ');
+                $fieldValue = str_replace($match, $replace, $fieldValue);
+
+        }
+
+        return $fieldValue;
     }
 
     public static function convertFilterStrValue($string) {
@@ -32,16 +58,30 @@ class SolrModel {
         $firstChar = mb_substr($string, 0, 1);
 
         if($firstChar !== false) {
-            $string = $firstChar == '%' ? mb_substr($string, 1) : "^$string";
+            $string = $firstChar == '%' ? '*' . mb_substr($string, 1) : $string;
         }
 
         $lastChar = mb_substr($string, -1, 1);
 
         if($lastChar !== false) {
-            $string = $lastChar == '%' ? mb_substr($string, -1) : "$string$";
+            $string = $lastChar == '%' ? mb_substr($string, -1) . '*' : $string;
         }
 
-        return '"'.$string.'"';
+        return $string;
+    }
+
+    protected static function getFieldType($fieldName) {
+
+        if(substr($fieldName, -3) == '_on') {
+            return self::FIELD_DATETIME;
+        }
+
+        if(substr($fieldName, 0, 3) == 'is_') {
+            return self::FIELD_BOOLEAN;
+        }
+
+        return self::FIELD_STRING;
+
     }
 
 
@@ -50,6 +90,15 @@ class SolrModel {
         $this->logger = $logger;
         $this->client = new SolrClient($config);
 
+    }
+
+    public function getQuery() {
+
+        if(!$this->query) {
+            $this->query = new SolrQuery();
+        }
+
+        return $this->query;
     }
 
     public function setFieldsValidators($validators) {
@@ -68,7 +117,7 @@ class SolrModel {
 
     public function getMany($params = null) {
 
-        $query = new SolrQuery();
+        $query = $this->getQuery();
 
         foreach($this->fields as $f) {
             $query->addField($f);
@@ -79,6 +128,7 @@ class SolrModel {
 
         $query->setQuery($q);
 
+
         if($params && $params->getOffset()) {
             $query->setStart($params->getOffset());
         }
@@ -87,9 +137,9 @@ class SolrModel {
             $query->setRows($params->getLimit());
         }
 
-        $this->applyFilter($query, $params);
+        $this->applyFilter($params);
 
-        $this->applyOrder($query, $params);
+        $this->applyOrder( $params);
 
 
         try {
@@ -116,12 +166,114 @@ class SolrModel {
         return $this->totalResultSetCount;
     }
 
+    protected function applyNotToField($fieldName, $fieldValue) {
 
-    protected function applyFilter(\SolrQuery $solrQuery, $params = null)
-    {
+        $query = $this->getQuery();
+
+        if (is_scalar($fieldValue)) {
+            $notValues = $fieldValue ? [$fieldValue] : [];
+        }
+
+        foreach ($notValues as $val) {
+            if(!is_scalar($val)) {
+                continue;
+            } else {
+                $val = self::sanitizeSolrFieldValue($fieldName, $val);
+            }
+
+            $query->addFilterQuery(is_null($val) ? "$fieldName:[* TO *]" : "!$fieldName:$val");
+        }
+
+        return $query;
+
+    }
+
+    protected function applyFromToField($fieldName, $fieldValue) {
+
+        $query = $this->getQuery();
+
+        if(is_null($fieldValue) || !is_scalar($fieldValue)) {
+            return $query;
+        }
+
+        $fieldValue = self::sanitizeSolrFieldValue($fieldName, $fieldValue);
+
+        $query->addFilterQuery("$fieldName:[$fieldValue TO *]");
+
+        return $query;
+
+    }
+
+    protected function applyToToField($fieldName, $fieldValue) {
+
+        $query = $this->getQuery();
+
+        if(is_null($fieldValue) || !is_scalar($fieldValue)) {
+            return $query;
+        }
+
+        $fieldValue = self::sanitizeSolrFieldValue($fieldName, $fieldValue);
+
+        $query->addFilterQuery("$fieldName:[* TO $fieldValue]");
+
+        return $query;
+
+    }
+
+    protected function applyInToField($fieldName, $fieldValue) {
+
+        $query = $this->getQuery();
+
+        if(!is_array($fieldValue) || count($fieldValue) == 0) {
+            return $query;
+        }
+
+        $params = [];
+
+        foreach($fieldValue as $val) {
+            if(is_scalar($val)) {
+                $params[] = self::sanitizeSolrFieldValue($fieldName, $val);
+            }
+        }
+
+        if($params) {
+            $query->addFilterQuery("$fieldName:(" . implode(' OR ', $params) . ")");
+        }
+
+        return $query;
+    }
+
+    protected function applyNullToField($fieldName) {
+
+        //http://stackoverflow.com/questions/4238609/how-to-query-solr-for-empty-fields
+        $query = $this->getQuery();
+        $query->addFilterQuery("-$fieldName:[* TO *]");
+
+        return $query;
+    }
+
+    protected function applyValueToField($fieldName, $fieldValue) {
+
+        $query = $this->getQuery();
+
+        if(!is_scalar($fieldValue)) {
+            return $query;
+        }
+
+        $fieldValue = self::sanitizeSolrFieldValue($fieldName, $fieldValue);
+
+        $query->addFilterQuery("$fieldName:$fieldValue");
+
+        return $query;
+    }
+
+
+    protected function applyFilter($params = null) {
+
+        $query = $this->getQuery();
 
         if (is_null($params)) {
-            return $solrQuery;
+            return $query;
         }
 
         $filters = $params->getFilter();
@@ -134,112 +286,58 @@ class SolrModel {
                 if (!array_key_exists($field, $filter)) {
                     continue;
                 } else {
+
+                    $fielType = self::getFieldType($field);
+
                     if(!is_array($filter[$field])) {
                         $fieldParams = self::escapeSolrValue($filter[$field]);
-                        //$fieldParams = self::convertFilterStrValue($fieldParams);
+                        $fieldParams = self::convertFilterStrValue($fieldParams);
                     } else {
                         $fieldParams = $filter[$field];
                     }
                 }
 
-                if (is_array($fieldParams) && array_key_exists('not', $fieldParams) && !is_array($fieldParams['not'])) {
-                    $fieldParams['not'] = [$fieldParams['not']];
-                }
-
                 if (is_array($fieldParams)) {
+
                     if (isset($fieldParams['not'])) {
-                        foreach ($fieldParams['not'] as $value) {
-                            if (is_null($value)) {
-                                $solrQuery->addFilterQuery("$field:[* TO *]");
-                            } else {
-                                $solrQuery->addFilterQuery("!$field:$value");
-                            }
-                        }
-
-                    } else {
-
-                        $from = $to = false;
-
-                        if (isset($fieldParams['from']) && is_scalar($fieldParams['from'])) {
-
-                            // Date fields should end by '_on' (posted_on)
-                            if (substr($field, -3) == '_on') {
-
-                                $time = strtotime($fieldParams['from']);
-
-                                $from = $time !== false ? date("c", $time) . 'Z' : false;
-                            } else {
-                                $from = $fieldParams['from'];
-                            }
-                        }
-
-
-                        if (isset($fieldParams['to']) && is_scalar($fieldParams['to'])) {
-
-                            if (substr($field, -3) == '_on') {
-                                $time = strtotime($fieldParams['to']);
-                                $to = $time !== false ? date("c", $time) . 'Z' : false;
-                            } else {
-                                $to = $fieldParams['to'];
-                            }
-                        }
-
-                        if ($from !== false && $to !== false) {
-
-                            $solrQuery->addFilterQuery("$field:[$from TO $to]");
-
-                        } elseif ($from !== false) {
-
-                            $solrQuery->addFilterQuery("$field:[$from TO *]");
-
-                        } elseif ($to !== false) {
-
-                            $solrQuery->addFilterQuery("$field:[* TO $to]");
-
-                        } else {
-                            $solrQuery->addFilterQuery("$field:(" . implode(' OR ', $fieldParams) . ")");
-
-                        }
+                        $this->applyNotToField($field, $fieldParams['not']);
+                        unset($fieldParams['not']);
                     }
 
+                    if (isset($fieldParams['from'])) {
+                        $this->applyFromToField($field, $fieldParams['from']);
+                        unset($fieldParams['from']);
+                    }
+
+                    if (isset($fieldParams['to'])) {
+                        $this->applyFromToField($field, $fieldParams['to']);
+                        unset($fieldParams['to']);
+                    }
+
+                    $this->applyInToField($field, $fieldParams);
 
                 } else {
 
-
-                    //http://stackoverflow.com/questions/4238609/how-to-query-solr-for-empty-fields
                     if (is_null($fieldParams)) {
-                        $solrQuery->addFilterQuery("-$field:[* TO *]");
-                    } // Logical fields should start by 'is_' (is_logo_on)
-                    elseif (substr($field, 0, 3) == 'is_') {
-
-                        $fieldParams = $fieldParams ? 'true' : 'false';
-
-
-                        $solrQuery->addFilterQuery("$field:$fieldParams");
-                    } // Date fields should end by '_on' (posted_on)
-                    elseif (substr($field, -3) == '_on') {
-
-                        $time = strtotime($fieldParams);
-                        $fieldParams = $time !== false ? date("c", $time) . 'Z' : false;
-
+                        $this->applyNullToField($field);
                     } else {
-                        $solrQuery->addFilterQuery("$field:$fieldParams");
+                        $this->applyValueToField($field, $fieldParams);
                     }
-
-
                 }
             }
         }
 
-        //error_log(print_r($solrQuery->getFilterQueries(),1));
+        //error_log(print_r($this->query->getFilterQueries(),1));
 
-        return $solrQuery;
+        return $query;
     }
 
-    protected function applyOrder(\SolrQuery $solrQuery, $params = null) {
+    protected function applyOrder($params = null) {
+
+        $query = $this->getQuery();
 
         if(is_null($params)) {
-            return $solrQuery;
+            return $query;
         }
 
         $orders = $params->getOrder();
@@ -262,7 +360,7 @@ class SolrModel {
 
             if($orderField === 'random' && $order[$orderField]) {
                 $randStr = substr(preg_replace("/[^a-zA-Z0-9]/", "", $order[$orderField]), 0, 16);
-                $solrQuery->addSortField("{$orderField}_{$randStr}", \SolrQuery::ORDER_DESC);
+                $query->addSortField("{$orderField}_{$randStr}", \SolrQuery::ORDER_DESC);
             }
 
             if(!isset($fields[$orderField])) {
@@ -270,15 +368,15 @@ class SolrModel {
             }
 
             if(strtolower($order[$orderField]) == 'asc') {
-                $solrQuery->addSortField($orderField, \SolrQuery::ORDER_ASC);
+                $query->addSortField($orderField, \SolrQuery::ORDER_ASC);
             }
 
             if(strtolower($order[$orderField]) == 'desc') {
-                $solrQuery->addSortField($orderField, \SolrQuery::ORDER_DESC);
+                $query->addSortField($orderField, \SolrQuery::ORDER_DESC);
             }
         }
 
-        return $solrQuery;
+        return $query;
     }
 
 
