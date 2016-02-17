@@ -57,19 +57,13 @@ class SolrModel {
 
         $firstChar = mb_substr($string, 0, 1);
 
-        error_log("First char is: $firstChar");
-
         if($firstChar !== false) {
-            error_log("String without first char: " . mb_substr($string, 1));
             $string = ($firstChar == '%' ? '*' . mb_substr($string, 1) : $string);
         }
 
         $lastChar = mb_substr($string, -1, 1);
 
-        error_log("Last char is: $firstChar");
-
         if($lastChar !== false) {
-            error_log("String without last char: " . mb_substr($string, 0, -1));
             $string = ($lastChar == '%' ? mb_substr($string, 0, -1) . '*' : $string);
         }
 
