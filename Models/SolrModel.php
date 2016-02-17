@@ -69,8 +69,8 @@ class SolrModel {
         error_log("Last char is: $firstChar");
 
         if($lastChar !== false) {
-            error_log("String without last char: " . mb_substr($string, -1));
-            $string = ($lastChar == '%' ? mb_substr($string, -1) . '*' : $string);
+            error_log("String without last char: " . mb_substr($string, 0, -1));
+            $string = ($lastChar == '%' ? mb_substr($string, 0, -1) . '*' : $string);
         }
 
         return $string;
