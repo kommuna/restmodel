@@ -57,14 +57,18 @@ class SolrModel {
 
         $firstChar = mb_substr($string, 0, 1);
 
+        error_log("First char is: $firstChar");
+
         if($firstChar !== false) {
-            $string = $firstChar == '%' ? '*' . mb_substr($string, 1) : $string;
+            $string = ($firstChar == '%' ? '*' . mb_substr($string, 1) : $string);
         }
 
         $lastChar = mb_substr($string, -1, 1);
 
+        error_log("Last char is: $firstChar");
+
         if($lastChar !== false) {
-            $string = $lastChar == '%' ? mb_substr($string, -1) . '*' : $string;
+            $string = ($lastChar == '%' ? mb_substr($string, -1) . '*' : $string);
         }
 
         return $string;
