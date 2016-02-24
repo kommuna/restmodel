@@ -19,7 +19,7 @@ abstract class Model {
     protected $errors = [];
     protected $postponeDeleteOnFieldName = 'deleted_on';
 
-    public function getUpdateMode() {
+    public function isUpdateMode() {
         return $this->updateMode;
     }
 
