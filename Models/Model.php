@@ -11,6 +11,7 @@ abstract class Model {
 
     protected $logger;
     protected $dbSettings;
+    protected $tableName;
     protected $updateMode = false;
 
     protected $validators = [];
@@ -18,6 +19,10 @@ abstract class Model {
     protected $values = [];
     protected $errors = [];
     protected $postponeDeleteOnFieldName = 'deleted_on';
+
+    protected function getORM() {
+        return ORM::for_table($this->tableName, $this->connectionName);
+    }
 
     public function isUpdateMode() {
         return $this->updateMode;
