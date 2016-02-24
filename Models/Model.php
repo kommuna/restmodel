@@ -11,12 +11,17 @@ abstract class Model {
 
     protected $logger;
     protected $dbSettings;
+    protected $updateMode = false;
 
     protected $validators = [];
     protected $fields = [];
     protected $values = [];
     protected $errors = [];
     protected $postponeDeleteOnFieldName = 'deleted_on';
+
+    public function getUpdateMode() {
+        return $this->updateMode;
+    }
 
     public function getFieldsValidators() {
         return $this->validators;
@@ -101,6 +106,8 @@ abstract class Model {
 
 
     public function setValues($values, $updateMode = false) {
+
+        $this->updateMode = $updateMode;
 
         $this->flushErrors();
 
