@@ -414,6 +414,10 @@ abstract class Model {
         return $orm;
     }
 
+    public function getManySQL($sql, $params=[]) {
+        return self::getORM()->raw_query($sql, $params)->find_array();
+    }
+
     public function getMany($params = null) {
 
         $orm = ORM::for_table($this->tableName, $this->connectionName);

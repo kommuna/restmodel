@@ -56,19 +56,27 @@ class SolrModel {
         }
 
         $firstChar = mb_substr($string, 0, 1);
+        $firstCharFixed = false;
+        $lastCharFixed = false;
 
-        if($firstChar !== false) {
-            $string = ($firstChar == '%' ? '*' . mb_substr($string, 1) : $string);
+        if($firstChar !== false && $firstChar == '%') {
+            $string = '*' . mb_substr($string, 1);
+            $firstCharFixed = true;
         }
 
         $lastChar = mb_substr($string, -1, 1);
 
-        if($lastChar !== false) {
-            $string = ($lastChar == '%' ? mb_substr($string, 0, -1) . '*' : $string);
+        if($lastChar !== false && $lastChar == '%') {
+            $string = mb_substr($string, 0, -1) . '*';
+            $lastCharFixed = true;
         }
 
-        if($firstChar === false && $lastChar === false) {
+        if($firstCharFixed === false && $lastCharFixed === false) {
             $string = '"' . $string . '"';
+        }
+
+        if(!empty($_GET['solrdebug'])) {
+            error_log("Solr filter value: $string");
         }
 
         return $string;
@@ -324,6 +332,9 @@ class SolrModel {
             }
         }
 
+        if(!empty($_GET['solrdebug'])) {
+            error_log("Solr URL:" . print_r($this->query->getFilterQueries(),1));
+        }
         //error_log("Solr URL:" . print_r($this->query->getFilterQueries(),1));
 
         return $query;
