@@ -16,6 +16,17 @@ class Controller {
 
     }
 
+    public function __($value) {
+
+        if(property_exists($this, 'app') && property_exists($this->app, 'log')
+            && method_exists($this->app->log, 'addDebug')) {
+            $this->app->log->addDebug($value);
+        } else {
+            error_log($value);
+        }
+
+    }
+
     protected static function getControllerName($controllerName) {
         return "{$controllerName}Controller";
     }
