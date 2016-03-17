@@ -107,7 +107,7 @@ class Controller {
     static public function notFound() {
         $app = Slim::getInstance();
         $params = $app->request->get();
-        $app->log->addWarning('Not found url: ' . $app->request->getPath() . ($params ? " GET params: ". print_r($params,1) : ''));
+        $app->log->addWarning('Not found url: ' . $app->request->getPathInfo() . ($params ? " GET params: ". print_r($params,1) : ''));
     }
 
     static public function error(\Exception $e) {
