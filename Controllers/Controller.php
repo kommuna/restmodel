@@ -9,6 +9,7 @@ use RestModel\Exceptions\InternalServerError500;
 use RestModel\Exceptions\APIException;
 use Slim\Slim;
 use PDO;
+use PDOStatement;
 
 class Controller {
 
@@ -156,7 +157,7 @@ class Controller {
         $this->app->response->headers->set('Content-type', 'application/csv');
         $this->app->response->headers->set('Content-Disposition', 'attachment; filename="'.$outputName.'"; modification-date="'.date('r').'";');
 
-        if($csv instanceof PDO) {
+        if($csv instanceof PDOStatement) {
 
             if(!($output = fopen("php://output",'w'))) {
                 InternalServerError500::throwException("Can't open output stream");
