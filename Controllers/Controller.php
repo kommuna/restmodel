@@ -162,6 +162,7 @@ class Controller {
             $this->app->response->headers->set('Content-type', 'application/csv');
             $this->app->response->headers->set('Content-Disposition', 'attachment; filename="'.$outputName.'"; modification-date="'.date('r').'";');
 
+        $flag = false;
             foreach($csv->fetch(PDO::FETCH_ASSOC) as $row) {
                 if(!$flag) {
                     fputcsv($output, array_keys($row));
