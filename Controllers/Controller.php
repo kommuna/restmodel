@@ -152,7 +152,7 @@ class Controller {
         $this->app->render($template, $params);
     }
 
-    public function sendCSVFile($csv, $outputName = 'file.csv') {
+    public function sendCSVFile($csv, $outputName = 'file.csv', $columnNames = []) {
 
         $this->app->response->headers->set('Content-type', 'application/csv');
         $this->app->response->headers->set('Content-Disposition', 'attachment; filename="'.$outputName.'"; modification-date="'.date('r').'";');
@@ -167,7 +167,8 @@ class Controller {
             while ($row = $csv->fetch(PDO::FETCH_ASSOC)) {
 
                 if (!$flag) {
-                    fputcsv($output, array_keys($row));
+                    $columnNames = $columnNames ?: array_keys($row);
+                    fputcsv($output, $columnNames);
                     $flag = true;
                 }
                 fputcsv($output, $row);
@@ -182,7 +183,10 @@ class Controller {
                 InternalServerError500::throwException("Can't open output stream");
             }
 
-            fputcsv($output, array_keys($csv));
+            if($columnNames) {
+                fputcsv($output, $columnNames);
+            }
+
             foreach($csv as $row) {
                 fputcsv($output, $row);
             }
