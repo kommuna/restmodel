@@ -152,7 +152,7 @@ class Controller {
 
     public function sendCSVFile($csv, $outputName = 'file.csv') {
 
-        if(is_array($csv)) {
+        if($csv instanceof PDO) {
 
             if(!($output = fopen("php://output",'w'))) {
                 InternalServerError500::throwException("Can't open output stream");
@@ -161,7 +161,7 @@ class Controller {
             $this->app->response->headers->set('Content-type', 'application/csv');
             $this->app->response->headers->set('Content-Disposition', 'attachment; filename="'.$outputName.'"; modification-date="'.date('r').'";');
             fputcsv($output, array_keys($csv));
-            foreach($csv as $row) {
+            foreach($csv->fetch(PDO::FETCH_ASSOC) as $row) {
                 fputcsv($output, $row);
             }
             if(!fclose($output)) {
