@@ -149,4 +149,14 @@ class Controller {
         $this->app->render($template, $params);
     }
 
+    public function sendCSVFile($csv) {
+        $this->app->response->headers->set('Content-type', 'application/csv');
+        $this->app->response->headers->set('Content-Length', strlen($csv));
+        $this->app->response->headers->set('Cache-Control', 'no-cache, must-revalidate');
+        $this->app->response->headers->set('Pragma', 'no-cache');
+        $this->app->response->headers->set('Expires', '0');
+        $this->app->response->headers->set('Content-Disposition', 'attachment; filename="DVDexport.csv"; modification-date="'.date('r').'";');
+        $this->app->halt(200, $csv);
+    }
+
 }
