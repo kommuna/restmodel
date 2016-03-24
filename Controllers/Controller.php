@@ -179,7 +179,16 @@ class Controller {
 
         } elseif(is_array($csv)) {
 
-            if (!($output = fopen("php://output", 'w'))) {
+            $csv = fopen('php://temp/maxmemory:'. (5*1024*1024), 'r+');
+
+            fputcsv($csv, array('blah','blah'));
+
+            rewind($csv);
+
+// put it all in a variable
+            $output = stream_get_contents($csv);
+
+            if (!($output = fopen('php://temp/maxmemory:'. (5*1024*1024), 'r+'))) {
                 InternalServerError500::throwException("Can't open output stream");
             }
 
@@ -189,13 +198,17 @@ class Controller {
 
             foreach($csv as $row) {
                 fputcsv($output, $row);
-                error_log(print_r($row,1));
             }
 
-            $this->app->halt(200);
+            rewind($output);
+            $return = stream_get_contents($output);
+
             if (!fclose($output)) {
                 InternalServerError500::throwException("Can't close php://output");
             }
+
+            $this->app->halt(200, $return);
+
 
         } else {
             $this->app->response->headers->set('Content-Length', strlen($csv));
