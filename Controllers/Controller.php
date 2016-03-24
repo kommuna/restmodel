@@ -159,24 +159,38 @@ class Controller {
 
         if($csv instanceof PDOStatement) {
 
-            if(!($output = fopen("php://output",'w'))) {
+            if (!($output = fopen("php://output", 'w'))) {
                 InternalServerError500::throwException("Can't open output stream");
             }
 
             $flag = false;
-            while($row = $csv->fetch(PDO::FETCH_ASSOC)) {
+            while ($row = $csv->fetch(PDO::FETCH_ASSOC)) {
 
-                if(!$flag) {
+                if (!$flag) {
                     fputcsv($output, array_keys($row));
                     $flag = true;
                 }
                 fputcsv($output, $row);
             }
-            if(!fclose($output)) {
+            if (!fclose($output)) {
                 InternalServerError500::throwException("Can't close php://output");
             }
 
-        } elseif(!is_array($csv)) {
+        } elseif (!is_array($csv)) {
+
+            if (!($output = fopen("php://output", 'w'))) {
+                InternalServerError500::throwException("Can't open output stream");
+            }
+
+            fputcsv($output, array_keys($csv));
+            foreach($csv as $row) {
+                fputcsv($output, $row);
+            }
+            if (!fclose($output)) {
+                InternalServerError500::throwException("Can't close php://output");
+            }
+
+        } else {
             $this->app->response->headers->set('Content-Length', strlen($csv));
             $this->app->response->headers->set('Cache-Control', 'no-cache, must-revalidate');
             $this->app->response->headers->set('Pragma', 'no-cache');
