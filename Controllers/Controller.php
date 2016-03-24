@@ -176,7 +176,7 @@ class Controller {
                 InternalServerError500::throwException("Can't close php://output");
             }
 
-        } elseif (!is_array($csv)) {
+        } elseif (is_array($csv)) {
 
             if (!($output = fopen("php://output", 'w'))) {
                 InternalServerError500::throwException("Can't open output stream");
