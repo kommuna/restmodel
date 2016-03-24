@@ -177,7 +177,7 @@ class Controller {
                 InternalServerError500::throwException("Can't close php://output");
             }
 
-        } elseif (is_array($csv)) {
+        } elseif(is_array($csv)) {
 
             if (!($output = fopen("php://output", 'w'))) {
                 InternalServerError500::throwException("Can't open output stream");
@@ -189,6 +189,7 @@ class Controller {
 
             foreach($csv as $row) {
                 fputcsv($output, $row);
+                error_log(print_r($row));
             }
             if (!fclose($output)) {
                 InternalServerError500::throwException("Can't close php://output");
@@ -201,6 +202,8 @@ class Controller {
             $this->app->response->headers->set('Expires', '0');
             $this->app->halt(200, $csv);
         }
+
+        $this->app->halt(200);
 
 
     }
