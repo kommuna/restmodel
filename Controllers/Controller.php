@@ -191,6 +191,8 @@ class Controller {
                 fputcsv($output, $row);
                 error_log(print_r($row,1));
             }
+
+            $this->app->halt(200);
             if (!fclose($output)) {
                 InternalServerError500::throwException("Can't close php://output");
             }
