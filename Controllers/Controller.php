@@ -153,16 +153,16 @@ class Controller {
 
     public function sendCSVFile($csv, $outputName = 'file.csv') {
 
-       /* if($csv instanceof PDO) {*/
+        $this->app->response->headers->set('Content-type', 'application/csv');
+        $this->app->response->headers->set('Content-Disposition', 'attachment; filename="'.$outputName.'"; modification-date="'.date('r').'";');
+
+        if($csv instanceof PDO) {
 
             if(!($output = fopen("php://output",'w'))) {
                 InternalServerError500::throwException("Can't open output stream");
             }
 
-            $this->app->response->headers->set('Content-type', 'application/csv');
-            $this->app->response->headers->set('Content-Disposition', 'attachment; filename="'.$outputName.'"; modification-date="'.date('r').'";');
-
-        $flag = false;
+            $flag = false;
             while($row = $csv->fetch(PDO::FETCH_ASSOC)) {
 
                 if(!$flag) {
@@ -172,16 +172,15 @@ class Controller {
                 fputcsv($output, $row);
             }
             if(!fclose($output)) {
-                InternalServerError500::throwException("Can't close php://output");
-            }
+            InternalServerError500::throwException("Can't close php://output");
 
-       /* } else {
+        } elseif(!is_array($csv)) {
             $this->app->response->headers->set('Content-Length', strlen($csv));
             $this->app->response->headers->set('Cache-Control', 'no-cache, must-revalidate');
             $this->app->response->headers->set('Pragma', 'no-cache');
             $this->app->response->headers->set('Expires', '0');
             $this->app->halt(200, $csv);
-        }*/
+        }
 
 
     }
