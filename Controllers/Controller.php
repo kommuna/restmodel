@@ -8,6 +8,7 @@ use RestModel\Exceptions\BadRequest400;
 use RestModel\Exceptions\InternalServerError500;
 use RestModel\Exceptions\APIException;
 use Slim\Slim;
+use PDO;
 
 class Controller {
 
