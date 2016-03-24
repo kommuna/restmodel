@@ -172,7 +172,8 @@ class Controller {
                 fputcsv($output, $row);
             }
             if(!fclose($output)) {
-            InternalServerError500::throwException("Can't close php://output");
+                InternalServerError500::throwException("Can't close php://output");
+            }
 
         } elseif(!is_array($csv)) {
             $this->app->response->headers->set('Content-Length', strlen($csv));
