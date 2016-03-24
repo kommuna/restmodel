@@ -179,15 +179,6 @@ class Controller {
 
         } elseif(is_array($csv)) {
 
-            $csv = fopen('php://temp/maxmemory:'. (5*1024*1024), 'r+');
-
-            fputcsv($csv, array('blah','blah'));
-
-            rewind($csv);
-
-// put it all in a variable
-            $output = stream_get_contents($csv);
-
             if (!($output = fopen('php://temp/maxmemory:'. (5*1024*1024), 'r+'))) {
                 InternalServerError500::throwException("Can't open output stream");
             }
