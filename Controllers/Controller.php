@@ -189,7 +189,7 @@ class Controller {
 
             foreach($csv as $row) {
                 fputcsv($output, $row);
-                error_log(print_r($row));
+                error_log(print_r($row,1));
             }
             if (!fclose($output)) {
                 InternalServerError500::throwException("Can't close php://output");
