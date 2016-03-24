@@ -5,6 +5,7 @@ namespace RestModel\Controllers;
 use Whoops\Run;
 use Whoops\Handler\PrettyPageHandler;
 use RestModel\Exceptions\BadRequest400;
+use RestModel\Exceptions\InternalServerError500;
 use RestModel\Exceptions\APIException;
 use Slim\Slim;
 
@@ -149,14 +150,33 @@ class Controller {
         $this->app->render($template, $params);
     }
 
-    public function sendCSVFile($csv) {
-        $this->app->response->headers->set('Content-type', 'application/csv');
-        $this->app->response->headers->set('Content-Length', strlen($csv));
-        $this->app->response->headers->set('Cache-Control', 'no-cache, must-revalidate');
-        $this->app->response->headers->set('Pragma', 'no-cache');
-        $this->app->response->headers->set('Expires', '0');
-        $this->app->response->headers->set('Content-Disposition', 'attachment; filename="DVDexport.csv"; modification-date="'.date('r').'";');
-        $this->app->halt(200, $csv);
+    public function sendCSVFile($csv, $outputName = 'file.csv') {
+
+        if(is_array($csv)) {
+
+            if(!($output = fopen("php://output",'w'))) {
+                InternalServerError500::throwException("Can't open output stream");
+            }
+
+            $this->app->response->headers->set('Content-type', 'application/csv');
+            $this->app->response->headers->set('Content-Disposition', 'attachment; filename="'.$outputName.'"; modification-date="'.date('r').'";');
+            fputcsv($output, array_keys($csv));
+            foreach($csv as $row) {
+                fputcsv($output, $row);
+            }
+            if(!fclose($output)) {
+                InternalServerError500::throwException("Can't close php://output");
+            }
+
+        } else {
+            $this->app->response->headers->set('Content-Length', strlen($csv));
+            $this->app->response->headers->set('Cache-Control', 'no-cache, must-revalidate');
+            $this->app->response->headers->set('Pragma', 'no-cache');
+            $this->app->response->headers->set('Expires', '0');
+            $this->app->halt(200, $csv);
+        }
+
+
     }
 
 }
