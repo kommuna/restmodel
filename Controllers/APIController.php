@@ -117,10 +117,10 @@ class APIController extends Controller {
         $this->response($item, false, false, $statusCode);
     }
 
-    public function addItem() {
+    public function addItem($body = false) {
 
 
-        $body = $this->decodeJSON($this->app->request->getBody());
+        $body = $body ?: $this->decodeJSON($this->app->request->getBody());
 
         if(isset($body['id'])) {
             unset($body['id']);
