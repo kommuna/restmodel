@@ -159,7 +159,7 @@ class Controller {
 
         if($csv instanceof PDOStatement) {
 
-            if (!($output = fopen("php://output", 'w'))) {
+            if (!($output = fopen('php://temp/maxmemory:'. (5*1024*1024), 'r+'))) {
                 InternalServerError500::throwException("Can't open output stream");
             }
 
