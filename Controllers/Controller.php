@@ -171,9 +171,13 @@ class Controller {
                     fputcsv($output, $columnNames);
                     $flag = true;
                 }
-                error_log(print_r($row ,1));
                 fputcsv($output, $row);
             }
+
+            rewind($output);
+            $return = stream_get_contents($output);
+            $this->app->halt(200, $return);
+
             if (!fclose($output)) {
                 InternalServerError500::throwException("Can't close php://output");
             }
