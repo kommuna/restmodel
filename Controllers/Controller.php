@@ -171,6 +171,7 @@ class Controller {
                     fputcsv($output, $columnNames);
                     $flag = true;
                 }
+                error_log(print_r($row ,1));
                 fputcsv($output, $row);
             }
             if (!fclose($output)) {
