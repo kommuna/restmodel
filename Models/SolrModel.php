@@ -135,7 +135,7 @@ class SolrModel {
             $query->addField($f);
         }
 
-        $q = $params && $params->getQuery() ? self::escapeSolrValue(trim($params->getQuery())) : false;
+        $q = $params && $params->getQuery() ? self::sanitizeSolrFieldValue('q',trim($params->getQuery())) : false;
         $q = $q ? $q : "*:*";
 
         $query->setQuery($q);
