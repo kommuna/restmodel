@@ -134,7 +134,7 @@ abstract class Model {
         }
 */
 
-        if(/*$force ||*/ (!empty($this->fields[$field]))) {
+        if($force || (isset($this->fields[$field]) && $this->fields[$field])) {
             $this->values[$field] = $value;
         }
     }
