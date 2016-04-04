@@ -187,12 +187,12 @@ abstract class Model {
 
 
         if(!empty($this->values['id'])) {
-            error_log('find item by id');
             $row = ORM::for_table($this->tableName, $this->connectionName)->find_one($this->values['id']);
         } else {
             $row = ORM::for_table($this->tableName, $this->connectionName)->create();
         }
 
+        error_log(print_r($row,1));
         foreach($this->values as $field => $value) {
             if($field === 'id') {
                 continue;
@@ -201,11 +201,10 @@ abstract class Model {
         }
 
         try {
-
+            error_log(print_r($row,1));
             $row->save();
 
         } catch (\Exception $e) {
-            error_log("error during saving");
             ModelException::throwException($e->getMessage());
         }
 
