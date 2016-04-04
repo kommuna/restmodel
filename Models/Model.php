@@ -185,8 +185,9 @@ abstract class Model {
 
     public function save() {
 
-        error_log(print_r($this->values,1));
-        if(isset($this->values['id']) && $this->values['id']) {
+
+        if(!empty($this->values['id'])) {
+            error_log('find item by id');
             $row = ORM::for_table($this->tableName, $this->connectionName)->find_one($this->values['id']);
         } else {
             $row = ORM::for_table($this->tableName, $this->connectionName)->create();
@@ -204,6 +205,7 @@ abstract class Model {
             $row->save();
 
         } catch (\Exception $e) {
+            error_log("error during saving");
             ModelException::throwException($e->getMessage());
         }
 
