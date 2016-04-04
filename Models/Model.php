@@ -185,6 +185,7 @@ abstract class Model {
 
     public function save() {
 
+        error_log(print_r($this->values,1));
         if(isset($this->values['id']) && $this->values['id']) {
             $row = ORM::for_table($this->tableName, $this->connectionName)->find_one($this->values['id']);
         } else {
