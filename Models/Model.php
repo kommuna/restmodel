@@ -192,7 +192,7 @@ abstract class Model {
             $row = ORM::for_table($this->tableName, $this->connectionName)->create();
         }
 
-        error_log(print_r($row,1));
+        //error_log(print_r($row,1));
         foreach($this->values as $field => $value) {
             if($field === 'id') {
                 continue;
@@ -201,7 +201,7 @@ abstract class Model {
         }
 
         try {
-            error_log(print_r($row,1));
+            //error_log(print_r($row,1));
             $row->save();
 
         } catch (\Exception $e) {
