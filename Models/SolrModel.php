@@ -164,7 +164,7 @@ class SolrModel {
         if($queryResponse->success()) {
             //$response = $queryResponse->getResponse();
             $response = $queryResponse->getRawResponse();
-            error_log($response);
+            //error_log($response);
             $response = json_decode($response, true, 512, JSON_OBJECT_AS_ARRAY);
             $this->totalResultSetCount = (int)$response['response']['numFound'];
             $response = $response['response']['docs'];
