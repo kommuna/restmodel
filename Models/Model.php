@@ -201,11 +201,10 @@ abstract class Model {
         }
 
         try {
-            error_log(print_r($row,1));
+            //error_log(print_r($row,1));
             $row->save();
 
         } catch (\Exception $e) {
-            error_log(print_r($e,1));
             ModelException::throwException($e->getMessage());
         }
 
