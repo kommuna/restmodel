@@ -36,12 +36,7 @@ class APIException extends Exception {
     }
 
     protected function refreshMessage() {
-
-        if($this->errorsArray) {
-            $this->message = json_encode($this->errorsArray);
-        } else {
-            $this->message = "";
-        }
+        $this->message = json_encode($this->errorsArray);
     }
 
 }
