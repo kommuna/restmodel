@@ -476,6 +476,20 @@ abstract class Model {
         }
     }
 
+    public function markAsUnDeleted($id) {
+
+        $row = ORM::for_table($this->tableName, $this->connectionName)->find_one($id);
+
+        if($row) {
+            $row->set($this->postponeDeleteOnFieldName, null);
+            try {
+                $row->save();
+            } catch(\Exception $e) {
+                ModelException::throwException($e->getMessage());
+            }
+        }
+    }
+
     public function get($id) {
 
         $item = $this->getById($id);
