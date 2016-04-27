@@ -13,8 +13,6 @@ class APIException extends Exception {
 
         $self = new static();
         $self->addError($error);
-
-
         throw $self;
     }
 
