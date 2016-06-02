@@ -218,7 +218,7 @@ abstract class Model {
     public function getByCode($code) {
         $row = ORM::for_table($this->tableName, $this->connectionName)->where('code', $code)->find_array();
         $row = $row && isset($row[0]) ? $row[0] : [];
-        return $row ? $row : [];
+        return $row;
     }
 
     public function getByField($field, $value) {
