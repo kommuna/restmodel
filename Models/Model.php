@@ -20,7 +20,7 @@ abstract class Model {
     protected $errors = [];
     protected $postponeDeleteOnFieldName = 'deleted_on';
 
-    protected function getORM() {
+    public function getORM() {
         return ORM::for_table($this->tableName, $this->connectionName);
     }
 
