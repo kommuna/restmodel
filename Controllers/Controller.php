@@ -106,11 +106,27 @@ class Controller {
         });
 
     }
+    static public function isMobile() {
+
+        $app = Slim::getInstance();
+        $agent = strtolower($app->request->getUserAgent());
+
+        if (strstr($agent, 'android') !== false || $app->request->get('android')) {
+            return true;
+        } elseif (strstr($agent, 'iphone') !== false || strstr($agent, 'ipod') !== false || $app->request->get('iphone')) {
+            return true;
+        }
+
+        return false;
+    }
+
 
     static public function notFound() {
         $app = Slim::getInstance();
         $params = $app->request->get();
         $app->log->addWarning('Not found url: ' . $app->request->getPathInfo() . ($params ? " GET params: ". print_r($params,1) : ''));
+        $app->render(self::isMobile() ? 'phone/404.tpl' : 'page/404.tpl');
+        $app->halt(404);
     }
 
     static public function error(\Exception $e) {
