@@ -318,7 +318,7 @@ class SolrModel {
                     }
 
                     if (isset($fieldParams['to'])) {
-                        $this->applyFromToField($field, $fieldParams['to']);
+                        $this->applyToToField($field, $fieldParams['to']);
                         unset($fieldParams['to']);
                     }
 
