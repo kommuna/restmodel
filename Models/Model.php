@@ -24,6 +24,10 @@ abstract class Model {
         return ORM::for_table($this->tableName, $this->connectionName);
     }
 
+    public function getPDO() {
+        return ORM::get_db($this->connectionName);
+    }
+
     public function isUpdateMode() {
         return $this->updateMode;
     }
