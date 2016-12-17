@@ -97,7 +97,7 @@ class APIController extends Controller {
             BadRequest400::throwException('Body request is empty!');
         }
 
-        $json = json_decode($jsonString, true);
+        $json = json_decode($jsonString, true, 20, JSON_OBJECT_AS_ARRAY);
 
         if(json_last_error()) {
             BadRequest400::throwException('Request JSON data is invalid!');
