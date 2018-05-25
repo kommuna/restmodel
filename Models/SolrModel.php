@@ -33,7 +33,7 @@ class SolrModel {
             case self::FIELD_DATETIME:
                 $time = strtotime($fieldValue);
                 if($time !== false) {
-                    $fieldValue = date("c", $time) . 'Z';
+                    $fieldValue = date('Y-m-d') . 'T' . date('H:i:s') . 'Z';
                 } else {
                     ModelException::throwException('Wrong format of datetime value!');
                 }
